@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "SafeHarborFunctionApp": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7079",
+      "launchBrowser": false
+    }
+  }
+}
