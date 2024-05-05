@@ -1,8 +1,5 @@
-﻿using SH.DAL;
-using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SafeHarborFunctionApp.Services;
 using SH.BLL;
 using SH.Models.Models;
@@ -15,11 +12,6 @@ public class Startup : FunctionsStartup
 {
     public override void Configure(IFunctionsHostBuilder builder)
     {
-        // DB Context
-        builder.Services.AddDbContext<CustomerDbContext>(
-            DbContextOptions => DbContextOptions.UseSqlite("CustomersDb",
-                b => b.MigrationsAssembly("SH.DAL.Sqlite")));
-
         builder.Services.AddHttpClient();
         //builder.Services.AddSingleton<IImageService>((s) => new ImageService());
         builder.Services.AddScoped<IImageService, ImageService>();

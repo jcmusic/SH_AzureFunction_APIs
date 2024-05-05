@@ -8,25 +8,24 @@ namespace SH.DAL.Sqlite
     {
         #region Ctor/Fields
 
+        private const string DOB_NAME = "SH_Customers.db";
         private readonly string _dbPath;
         private readonly string _readOnlyConnectionString;
-        private const string DOB_FORMAT = "yyyy-MM-dd";
 
         public CustomerRepo()
         {
             if (Directory.Exists(Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName))
             {
-                _dbPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName, "JCM_Customers.db");
+                _dbPath = Path.Join(Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName, DOB_NAME);
             }
             else
             {
-                _dbPath = Path.Join(Environment.CurrentDirectory, "JCM_Customers.db");
+                _dbPath = Path.Join(Environment.CurrentDirectory, DOB_NAME);
             }
 
             _readOnlyConnectionString = $"Data Source = {_dbPath}; Mode = ReadOnly";
 
             //create sqlite db if not exists
-            //using var conn = new SqliteConnection("Data Source=C:\\Customers.db");
             using var connection = new SqliteConnection($"Data Source={_dbPath}");
             connection.Open();
 
