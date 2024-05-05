@@ -71,13 +71,16 @@ namespace SH.DAL.Sqlite
         public async Task<CustomerDto> GetCustomerByIdAsync(string customerId)
         {
 
-            var conn = new SqliteConnection(_readOnlyConnectionString);
-            conn.Open();
-            var cmd = conn.CreateCommand();
+            using var conn = new SqliteConnection(_readOnlyConnectionString);
+            await conn.OpenAsync();
+
+            using var cmd = conn.CreateCommand();
+
+            // Note:  SqlLite is case senstive!! CustomerId Guid is stored as uppercase text.
             cmd.CommandText = $"SELECT CustomerId, FullName, DateOfBirth FROM Customers WHERE CustomerId = '{customerId.ToUpper()}';";
 
             cmd.Prepare();
-            var reader = cmd.ExecuteReader();
+            var reader = await cmd.ExecuteReaderAsync();
             try
             {
                 if (!reader.HasRows)

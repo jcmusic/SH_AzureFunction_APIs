@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SH.BLL;
 using SH.Models.Customer;
-using SQLitePCL;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -14,23 +13,6 @@ using System.Threading.Tasks;
 
 namespace SafeHarborFunctionApp
 {
-    //public CustomerEndpoints(IHttpClientFactory httpClientFactory)
-    //{
-    //    this._client = httpClientFactory.CreateClient();
-    //}
-
-    //[FunctionName("MyHttpTrigger")]
-    //public async Task<IActionResult> Run(
-    //    [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-    //    ILogger log)
-    //{
-    //    var response = await _client.GetAsync("https://microsoft.com");
-    //    var message = _service.GetMessage();
-
-    //    return new OkObjectResult("Response from function with injected dependencies.");
-    //}
-
-
     public class CustomerFunctions
     {
         private readonly HttpClient _client;
