@@ -8,6 +8,7 @@ namespace SH.BLL
     {
         Task<CustomerDto> AddCustomerAsync(CreateCustomerRequest request);
         Task<CustomerDto> GetCustomerByIdAsync(string customerId);
+        Task<List<CustomerDto>> GetCustomersByAgeAsync(int age);
     }
     public class CustomerLogic : ICustomerLogic
     {
@@ -23,15 +24,7 @@ namespace SH.BLL
         public async Task<CustomerDto> AddCustomerAsync(CreateCustomerRequest request)
         {
             var dto = CreateCustomerDto.New(request);
-
             var newDto = await _customerRepo.AddCustomerAsync(dto);
-
-            //var newDto = new CustomerDto
-            //{
-            //    CustomerId = Guid.NewGuid(),
-            //    FullName = request.FullName,
-            //    DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth)
-            //};
 
             return await Task.FromResult<CustomerDto>(newDto);
         }
@@ -43,32 +36,10 @@ namespace SH.BLL
             return await Task.FromResult<CustomerDto>(newDto);
         }
 
-
-        //try
-        //{
-        //    var newCustomer = await _customerRepo.AddCustomerAsync(dto);
-
-
-        ////}
-        ////catch (Exception)
-        ////{
-        ////    return HttpStatusCode.BadRequest;
-        ////}
-        //return newCustomer;
-        //}
-
-
-        //public async Task<IActionResult> Create(Movie movie)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View(movie);
-        //    }
-
-        //    _context.Movies.Add(movie);
-        //    await _context.SaveChangesAsync();
-
-        //    return RedirectToAction(nameof(Index));
-        //}
+        public async Task<List<CustomerDto>> GetCustomersByAgeAsync(int age)
+        {
+            var dtoList = await _customerRepo.GetCustomersByAgeAsync(age);
+            return await Task.FromResult<List<CustomerDto>>(dtoList);
+        }
     }
 }
