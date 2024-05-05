@@ -42,7 +42,7 @@ namespace SafeHarborFunctionApp
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var createCustomerRequest = JsonConvert.DeserializeObject<CreateCustomerRequest>(requestBody);
 
-            var customer = await _customerLogic.AddCustomerAsync(createCustomerRequest);
+            var newCustomer = await _customerLogic.AddCustomerAsync(createCustomerRequest);
 
             // validate the createCustomerRequest object
 
@@ -60,15 +60,17 @@ namespace SafeHarborFunctionApp
             //    return new BadRequestObjectResult()
             //}
 
-            return new OkObjectResult(customer);
+            var uri = $"{req.HttpContext.Request.Scheme}://{req.HttpContext.Request.Host.Value}/api/customers/GUID/{newCustomer.CustomerId}";
+
+            return new CreatedResult(uri, newCustomer);
         }
 
         [FunctionName("GetCustomerById")]
         public async Task<IActionResult> GetCustomerById(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "customers/{guid}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "customers/GUID/{guid}")] HttpRequest req,
             ILogger log, string guid)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogInformation("'GetCustomerById' HTTP trigger function - begin");
 
             try
             {
@@ -86,5 +88,43 @@ namespace SafeHarborFunctionApp
                 return new OkObjectResult(msg);
             }
         }
+
+        [FunctionName("GetCustomerByAge")]
+        public async Task<IActionResult> GetCustomerByAge(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "customers/int/{age}")] HttpRequest req,
+            ILogger log, int age)
+        {
+            log.LogInformation("'GetCustomerByAge' HTTP trigger function - begin");
+
+            try
+            {
+                var customerList = await _customerLogic.GetCustomersByAgeAsync(age);
+                //if (customers == null)
+                //{
+                //    return new NotFoundResult();
+                //}
+                return new OkObjectResult(customerList);
+            }
+            catch (Exception e)
+            {
+                var msg = $"Error getting customers by age: {age}";
+                log.LogError(e, "msg");
+                return new OkObjectResult(msg);
+            }
+        }
     }
 }
+
+
+//public async Task<IActionResult> Create()
+//{
+//    if (!ModelState.IsValid)
+//    {
+//        return View(movie);
+//    }
+
+//    _context.Movies.Add(movie);
+//    await _context.SaveChangesAsync();
+
+//    return RedirectToAction(nameof(Index));
+//}
