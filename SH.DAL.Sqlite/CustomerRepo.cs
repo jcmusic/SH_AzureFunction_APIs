@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using SH.Models;
 using SH.Models.Customer;
 using SH.Models.Models;
 
@@ -65,7 +66,6 @@ namespace SH.DAL.Sqlite
 
         public async Task<CustomerDto> AddCustomerAsync(CreateCustomerDto dto)
         {
-            const string DOB_FORMAT = "yyyy-MM-dd";
             using var conn = new SqliteConnection($"Data Source={_dbPath}");
             using var cmd = conn.CreateCommand();
 
@@ -75,14 +75,14 @@ namespace SH.DAL.Sqlite
             cmd.CommandText = "INSERT INTO Customers (CustomerId, FullName, DateOfBirth) VALUES (@CustomerId, @FullName, @DateOfBirth)";
             cmd.Parameters.AddWithValue("@CustomerId", customerId);
             cmd.Parameters.AddWithValue("@FullName", dto.FullName);
-            cmd.Parameters.AddWithValue("@DateOfBirth", dto.DateOfBirth.ToString(DOB_FORMAT));
+            cmd.Parameters.AddWithValue("@DateOfBirth", dto.DateOfBirth.ToString(Constants.DOB_FORMAT));
             await cmd.ExecuteNonQueryAsync();
 
             CustomerDto newCustomer = await GetCustomerByIdAsync(customerId.ToString());
             return newCustomer;
         }
 
-        public async Task<CustomerDto> GetCustomerByIdAsync(string customerId)
+        public async Task<CustomerDto?> GetCustomerByIdAsync(string customerId)
         {
             using var conn = new SqliteConnection(_readOnlyConnectionString);
             await conn.OpenAsync();
@@ -126,7 +126,7 @@ namespace SH.DAL.Sqlite
             }
         }
 
-        public async Task<List<CustomerDto>> GetCustomersByAgeAsync(int age)
+        public async Task<List<CustomerDto>> GetCustomersByAgeAsync(DateOnly beginDate, DateOnly endDate)
         {
             var dtoList = new List<CustomerDto>();
             using var conn = new SqliteConnection(_readOnlyConnectionString);
@@ -134,13 +134,11 @@ namespace SH.DAL.Sqlite
 
             using var cmd = conn.CreateCommand();
 
-            var startDate = "1967-01-01";
-            var endDate = "1969-01-01";
-
-            //WHERE event_date >= '2023-02-07' AND event_date < '2023-02-08' -- Single Day  
+            var startDateString = beginDate.ToString(Constants.DOB_FORMAT);
+            var endDateString = endDate.ToString(Constants.DOB_FORMAT); 
 
             // Note: SqlLite is case senstive!! CustomerId Guid is stored as uppercase text.
-            cmd.CommandText = $"SELECT CustomerId, FullName, DateOfBirth FROM Customers WHERE DateOfBirth >= '{startDate}' AND DateOfBirth <= '{endDate}';";
+            cmd.CommandText = $"SELECT CustomerId, FullName, DateOfBirth FROM Customers WHERE DateOfBirth >= '{startDateString}' AND DateOfBirth <= '{endDateString}';";
 
             cmd.Prepare();
             var reader = await cmd.ExecuteReaderAsync();

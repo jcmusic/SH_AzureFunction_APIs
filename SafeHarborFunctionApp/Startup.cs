@@ -3,8 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using SafeHarborFunctionApp.Services;
 using SH.BLL;
 using SH.Models.Models;
+using System.Runtime.CompilerServices;
 
 [assembly: FunctionsStartup(typeof(SafeHarborFunctionApp.Startup))]
+[assembly: InternalsVisibleTo("SH.Tests")]
 
 namespace SafeHarborFunctionApp;
 
@@ -17,8 +19,6 @@ public class Startup : FunctionsStartup
         builder.Services.AddScoped<IImageService, ImageService>();
         builder.Services.AddScoped<ICustomerLogic, CustomerLogic>();
         builder.Services.AddScoped<ICustomerRepo, SH.DAL.Sqlite.CustomerRepo>();
-
-        //builder.Services.AddSingleton<ILoggerProvider, MyLoggerProvider>();
     }
 
 }

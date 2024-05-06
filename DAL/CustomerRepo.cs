@@ -86,9 +86,8 @@ namespace SH.DAL
             //return (mappedCustomerList, paginationMetadata);
         }
 
-        public async Task<List<CustomerDto>> GetCustomersByAgeAsync(int age)
+        public Task<List<CustomerDto>> GetCustomersByAgeAsync(DateOnly beginDate, DateOnly endDate)
         {
-
             throw new NotImplementedException();
 
             //var searchAgeStart = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(age * -1));

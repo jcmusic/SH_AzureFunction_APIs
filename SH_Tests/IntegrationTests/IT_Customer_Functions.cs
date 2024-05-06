@@ -1,4 +1,3 @@
-using Castle.Core.Logging;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
@@ -15,8 +14,6 @@ using System.Text;
 
 namespace SH.Tests.IntegrationTests
 {
-
-
     public class Customer_Logic_Factory
     {
         private readonly ILogger<CustomerLogic> _logger = NullLogger<CustomerLogic>.Instance;
@@ -33,7 +30,6 @@ namespace SH.Tests.IntegrationTests
         private readonly ICustomerLogic _customerLogic = new Customer_Logic_Factory().GetCustomerLogic();
         private readonly CustomerFunctions _sut;
         private readonly ILogger<CustomerFunctions> _logger = NullLogger<CustomerFunctions>.Instance;
-        private readonly IHttpClientFactory _httpClientFactory = Substitute.For<IHttpClientFactory>();
         private readonly Guid _customerId = Guid.NewGuid();
         private readonly Guid _emptyGuid = new Guid();
         private readonly DateTime _defaultDobDatetime = new DateTime(1999, 1, 1);
@@ -54,7 +50,7 @@ namespace SH.Tests.IntegrationTests
 
         public AzureFN_Customer_Tests()
         {
-            _sut = new CustomerFunctions(_httpClientFactory, _customerLogic);
+            _sut = new CustomerFunctions(_customerLogic);
         }
 
         [Fact]

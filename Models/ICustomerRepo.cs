@@ -6,7 +6,7 @@ namespace SH.Models.Models
     {
         Task<CustomerDto> AddCustomerAsync(CreateCustomerDto dto);
         Task<CustomerDto> GetCustomerByIdAsync(string id);
-        Task<List<CustomerDto>> GetCustomersByAgeAsync(int age);
+        Task<List<CustomerDto>> GetCustomersByAgeAsync(DateOnly beginDate, DateOnly endDate);
         //Task<(List<CustomerDto>, PaginationMetadata)> GetCustomersAsync(Predicate<int> agePredicate, int pageNumber, int pageSize);
     }
 }

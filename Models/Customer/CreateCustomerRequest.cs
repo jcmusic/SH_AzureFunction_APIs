@@ -17,5 +17,14 @@ namespace SH.Models.Customer
 
         [Required]
         public DateTime DateOfBirth { get; set; }
+
+        public CreateCustomerDto ToCreateCustomerDto()
+        {
+            return new CreateCustomerDto
+            {
+                FullName = FullName,
+                DateOfBirth = DateOnly.FromDateTime(DateOfBirth)
+            };
+        }
     }
 }
