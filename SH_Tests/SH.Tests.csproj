@@ -7,7 +7,14 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="IntegrationTests\**" />
+    <EmbeddedResource Remove="IntegrationTests\**" />
+    <None Remove="IntegrationTests\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2">
