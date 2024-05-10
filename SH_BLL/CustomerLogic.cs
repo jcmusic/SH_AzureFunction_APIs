@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SH.Models.Customer;
 using SH.Models.Models;
 using System.Runtime.CompilerServices;
@@ -40,7 +40,8 @@ namespace SH.BLL
 
             if (newDto is not null && newDto.ProfileImage == null)
             {
-                await SendRequestToPopulateImageAsync(newDto);
+                await GetAndPersistCustomerProfileImage(newDto);
+                return await GetCustomerByIdAsync(newDto.CustomerId.ToString());
             }
 
             return await Task.FromResult<CustomerDto>(newDto);
@@ -66,7 +67,8 @@ namespace SH.BLL
 
         public async Task GetAndPersistCustomerProfileImage(CustomerDto dto)
         {
-            var imageByteArray = await _httpClient.GetByteArrayAsync("https://ui-avatars.com/api/?John+Doe&format=svg");
+            var response = await _httpClient.GetAsync("https://ui-avatars.com/api/?John+Doe&format=svg");
+            var imageByteArray = await response.Content.ReadAsByteArrayAsync();
             await _customerRepo.PersistImageToCustomerDBAsync(dto.CustomerId, imageByteArray);
         }
 
