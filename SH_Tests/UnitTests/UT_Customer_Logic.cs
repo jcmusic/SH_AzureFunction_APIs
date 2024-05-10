@@ -7,6 +7,7 @@ using NSubstitute.ReturnsExtensions;
 using SH.BLL;
 using SH.Models.Customer;
 using SH.Models.Models;
+using System.Net.Http;
 
 namespace SH.Tests.UnitTests
 {
@@ -16,6 +17,7 @@ namespace SH.Tests.UnitTests
         #region Ctor/Fields
 
         private readonly ILogger<CustomerLogic> _logger;
+        private readonly HttpClient _httpClient;
         private readonly ICustomerLogic _bll;
         private readonly ICustomerRepo _customerRepo;
         private readonly Guid _customerId = Guid.NewGuid();
@@ -40,7 +42,8 @@ namespace SH.Tests.UnitTests
         {
             _logger = NullLogger<CustomerLogic>.Instance;
             _customerRepo = Substitute.For<ICustomerRepo>();
-            _bll = new CustomerLogic(_logger, _customerRepo);
+            _httpClient = Substitute.For<HttpClient>();
+            _bll = new CustomerLogic(_logger, _customerRepo, _httpClient);
         }
 
         #endregion
