@@ -124,5 +124,52 @@ namespace SafeHarborFunctionApp
                 return resultObj;
             }
         }
+
+        [FunctionName("PopulateCustomerProfileImage")]
+        public async Task<IActionResult> PopulateCustomerProfileImage(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "customers/populateprofileImage/{guid}")] HttpRequest req,
+            ILogger log, string guid)
+        {
+            log.LogInformation("'GetCustomerById' HTTP trigger function - begin");
+
+            try
+            {
+                if (guid is null)
+                {
+                    return new BadRequestObjectResult("CustomerId may not be null.");
+                }
+                if (guid == new Guid().ToString())
+                {
+                    return new BadRequestObjectResult("CustomerId may not be an empty Guid.");
+                }
+
+                try
+                {
+                    var g = new Guid(guid);
+                }
+                catch (Exception)
+                {
+                    return new BadRequestObjectResult("CustomerId is not a valid Guid.");
+                }
+
+                var customerDto = await _customerLogic.GetCustomerByIdAsync(guid);
+
+                if (customerDto == null)
+                    return new NotFoundObjectResult("CustomerId not found.");
+
+
+                await _customerLogic.GetAndPersistCustomerProfileImage(customerDto);
+
+                return new OkResult();
+            }
+            catch (Exception e)
+            {
+                var msg = $"Internal Server Error while retrieving customerId: {guid}";
+                log.LogError(e, msg);
+                var resultObj = new ObjectResult(msg);
+                resultObj.StatusCode = StatusCodes.Status500InternalServerError;
+                return resultObj;
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using SH.Models.Customer;
 using SH.Models.Models;
+using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("SH.Tests")]
 
@@ -10,7 +10,8 @@ namespace SH.BLL
     public interface ICustomerLogic
     {
         Task<CustomerDto> AddCustomerAsync(CreateCustomerDto dto);
-        Task<CustomerDto> GetCustomerByIdAsync(string customerId);
+        Task GetAndPersistCustomerProfileImage(CustomerDto dto);
+        Task<CustomerDto?> GetCustomerByIdAsync(string customerId);
         Task<List<CustomerDto>> GetCustomersByAgeAsync(int age);
         (DateOnly beginDate, DateOnly endDate) GetDatesTupleForAge(int age);
     }
@@ -21,11 +22,14 @@ namespace SH.BLL
 
         private readonly ILogger<CustomerLogic> _logger;
         private readonly ICustomerRepo _customerRepo;
+        private readonly HttpClient _httpClient;
 
-        public CustomerLogic(ILogger<CustomerLogic> logger, ICustomerRepo customerRepo)
+        public CustomerLogic(ILogger<CustomerLogic> logger, 
+            ICustomerRepo customerRepo, HttpClient httpClient)
         {
             _logger = logger;
             _customerRepo = customerRepo;
+            _httpClient = httpClient;
         }
 
         #endregion
@@ -34,12 +38,40 @@ namespace SH.BLL
         {
             var newDto = await _customerRepo.AddCustomerAsync(dto);
 
+            if (newDto is not null && newDto.ProfileImage == null)
+            {
+                await SendRequestToPopulateImageAsync(newDto);
+            }
+
             return await Task.FromResult<CustomerDto>(newDto);
+        }
+
+        /// <summary>
+        /// Update to place a message in a msgQueue and update the Az function trigger to queue
+        /// </summary>
+        /// <param name="newDto"></param>
+        /// <returns></returns>
+        private async Task SendRequestToPopulateImageAsync(CustomerDto? newDto)
+        {
+            var uriBuilder = new UriBuilder
+            {
+                Scheme = "http",
+                Host = "localhost",
+                Port = 7079,
+                Path = $"api/customers/populateprofileImage/{newDto.CustomerId}"
+            };
+
+            await _httpClient.GetAsync(uriBuilder.ToString());
+        }
+
+        public async Task GetAndPersistCustomerProfileImage(CustomerDto dto)
+        {
+            var imageByteArray = await _httpClient.GetByteArrayAsync("https://ui-avatars.com/api/?John+Doe&format=svg");
+            await _customerRepo.PersistImageToCustomerDBAsync(dto.CustomerId, imageByteArray);
         }
 
         public async Task<CustomerDto?> GetCustomerByIdAsync(string customerId)
         {
-            //return await _customerRepo.GetCustomerByIdAsync(customerId);
             var newDto = await _customerRepo.GetCustomerByIdAsync(customerId);
             return await Task.FromResult(newDto);
         }

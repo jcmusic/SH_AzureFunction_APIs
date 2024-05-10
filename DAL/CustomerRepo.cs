@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
-using SH.DAL.Entities;
-using LinqKit;
 using Microsoft.EntityFrameworkCore;
+using SH.DAL.Entities;
 using SH.Models;
 using SH.Models.Customer;
 using SH.Models.Models;
 
-namespace SH.DAL
+namespace SH.DAL.EF
 {
     public class CustomerRepo : ICustomerRepo
     {
@@ -44,7 +43,7 @@ namespace SH.DAL
             return mappedCustomer;
         }
 
-        public async Task<CustomerDto> GetCustomerByIdAsync(string id)
+        public async Task<CustomerDto?> GetCustomerByIdAsync(string id)
         {
             var customerId = Guid.Parse(id);
             var customer = await _customerDbContext.Customers
@@ -102,6 +101,11 @@ namespace SH.DAL
             //var mappedCustomerList = _mapper.Map<List<CustomerDto>>(customers);
 
             //return (mappedCustomerList);
+        }
+
+        public Task PersistImageToCustomerDBAsync(Guid customerId, byte[] imageByteArray)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<bool> SaveChangesAsync()

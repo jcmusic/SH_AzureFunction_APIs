@@ -7,8 +7,6 @@ namespace SH.BLL
     {
         public CreateCustomerRequestValidator()
         {
-            DateTime dte;
-
             RuleFor(x => x.FullName)
                 .NotEmpty().WithMessage("FullName is required")
                 .MinimumLength(4).WithMessage("FullName minimum length is 4 characters");

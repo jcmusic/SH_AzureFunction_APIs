@@ -2,6 +2,7 @@
 using SH.Models;
 using SH.Models.Customer;
 using SH.Models.Models;
+using System.Text;
 
 namespace SH.DAL.Sqlite
 {
@@ -89,8 +90,8 @@ namespace SH.DAL.Sqlite
 
             using var cmd = conn.CreateCommand();
 
-            // Note:  SqlLite is case senstive!! CustomerId Guid is stored as uppercase text.
-            cmd.CommandText = $"SELECT CustomerId, FullName, DateOfBirth FROM Customers WHERE CustomerId = '{customerId.ToUpper()}';";
+            // Note: SqlLite is case sensitive!! CustomerId Guid is stored as uppercase text.
+            cmd.CommandText = $"SELECT CustomerId, FullName, DateOfBirth, ProfileImage FROM Customers WHERE CustomerId = '{customerId.ToUpper()}';";
 
             cmd.Prepare();
             var reader = await cmd.ExecuteReaderAsync();
@@ -109,11 +110,10 @@ namespace SH.DAL.Sqlite
                     {
                         throw new Exception("More than one record found");
                     }
-                    dto = new CustomerDto(
-                        reader.GetGuid(0),
-                        reader.GetString(1),
-                        DateOnly.FromDateTime(reader.GetDateTime(2))
-                    );
+                    dto.CustomerId = reader.GetGuid(0);
+                    dto.FullName = reader.GetString(1);
+                    dto.DateOfBirth = DateOnly.FromDateTime(reader.GetDateTime(2));
+                    dto.ProfileImage = reader[3].GetType() == typeof(DBNull) ? null : Encoding.ASCII.GetBytes(reader.GetString(3));
 
                     counter++;
                 }
@@ -137,8 +137,8 @@ namespace SH.DAL.Sqlite
             var startDateString = beginDate.ToString(Constants.DOB_FORMAT);
             var endDateString = endDate.ToString(Constants.DOB_FORMAT); 
 
-            // Note: SqlLite is case senstive!! CustomerId Guid is stored as uppercase text.
-            cmd.CommandText = $"SELECT CustomerId, FullName, DateOfBirth FROM Customers WHERE DateOfBirth >= '{startDateString}' AND DateOfBirth <= '{endDateString}';";
+            // Note: SqlLite is case sensitive!! CustomerId Guid is stored as uppercase text.
+            cmd.CommandText = $"SELECT CustomerId, FullName, DateOfBirth, ProfileImage FROM Customers WHERE DateOfBirth >= '{startDateString}' AND DateOfBirth <= '{endDateString}';";
 
             cmd.Prepare();
             var reader = await cmd.ExecuteReaderAsync();
@@ -152,11 +152,10 @@ namespace SH.DAL.Sqlite
                 CustomerDto dto = new CustomerDto();
                 while (reader.Read())
                 {
-                    dto = new CustomerDto(
-                        reader.GetGuid(0),
-                        reader.GetString(1),
-                        DateOnly.FromDateTime(reader.GetDateTime(2))
-                    );
+                    dto.CustomerId = reader.GetGuid(0);
+                    dto.FullName = reader.GetString(1);
+                    dto.DateOfBirth = DateOnly.FromDateTime(reader.GetDateTime(2));
+                    dto.ProfileImage = reader[3].GetType() == typeof(DBNull) ? null : Encoding.ASCII.GetBytes(reader.GetString(3));
 
                     dtoList.Add(dto);
                 }
@@ -168,6 +167,19 @@ namespace SH.DAL.Sqlite
                 reader.Close();
                 conn.Close();
             }
+        }
+
+        public async Task PersistImageToCustomerDBAsync (Guid customerId, byte[] imageByteArray)
+        {
+            using var conn = new SqliteConnection($"Data Source={_dbPath}");
+            using var cmd = conn.CreateCommand();
+
+            conn.Open();
+
+            cmd.CommandText = "UPDATE Customers SET ProfileImage = @imageByteArray WHERE CustomerId = @customerId";
+            cmd.Parameters.AddWithValue("@imageByteArray", imageByteArray);
+            cmd.Parameters.AddWithValue("customerId", customerId.ToString().ToUpper());
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 }
